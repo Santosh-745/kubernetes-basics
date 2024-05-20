@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-mongo-app
+  labels:
+    app: mongo-app-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mongo-app-backend
+  template:
+    metadata:
+      labels:
+        app: mongo-app-backend
+    spec:
+      containers:
+        - name: my-mongo-app-container
+          image: sambhavanisantosh322/node-mongo-app:v1
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGO_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: MONGO_HOST
+            - name: MONGO_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: MONGO_PORT
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: service-mongo-app-backend
+spec:
+  ports:
+    - name: http
+      port: 4000
+      targetPort: 3000
+  selector:
+    app: mongo-app-backend
+  type: LoadBalancer
